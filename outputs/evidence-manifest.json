@@ -1,0 +1,37 @@
+{
+  "evidence_pack": "NeoXFortress Agent Risk Lab",
+  "generated_utc": "2026-03-01T14:17:29.199306+00:00",
+  "files": [
+    {
+      "name": "execution-log.json",
+      "type": "Structured event log"
+    },
+    {
+      "name": "receipt-prompt_injection.json",
+      "type": "Agent Accountability Receipt"
+    },
+    {
+      "name": "receipt-exfiltration.json",
+      "type": "Agent Accountability Receipt"
+    },
+    {
+      "name": "receipt-privilege_escalation.json",
+      "type": "Agent Accountability Receipt"
+    },
+    {
+      "name": "report.md",
+      "type": "Exploit report (Markdown)"
+    },
+    {
+      "name": "report.html",
+      "type": "Exploit report (HTML)"
+    }
+  ],
+  "scenarios": [
+    "prompt_injection",
+    "exfiltration",
+    "privilege_escalation"
+  ],
+  "total_events": 12,
+  "blocked_actions": 9
+}
