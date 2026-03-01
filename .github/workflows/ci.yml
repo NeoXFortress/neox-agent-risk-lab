@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install jsonschema
+        run: pip install jsonschema
+
+      - name: Run all scenarios
+        run: python run_all.py
+
+      - name: Verify outputs exist
+        run: |
+          test -f outputs/execution-log.json
+          test -f outputs/receipt-prompt_injection.json
+          test -f outputs/receipt-exfiltration.json
+          test -f outputs/receipt-privilege_escalation.json
+          test -f outputs/report.md
+          test -f outputs/report.html
+          test -f outputs/evidence-manifest.json
+          echo "All output files present"
+
+      - name: Validate receipts against schema
+        run: |
+          # Fetch the schema from the sister repo
+          curl -sL https://raw.githubusercontent.com/NeoXFortress/agent-accountability-receipt/main/schema.json -o /tmp/schema.json
+          for f in outputs/receipt-*.json; do
+            echo "Validating $f..."
+            python -m jsonschema -i "$f" /tmp/schema.json
+            echo "  PASS: $f"
+          done
+
+      - name: Verify event count
+        run: |
+          python -c "
+          import json
+          with open('outputs/execution-log.json') as f:
+              logs = json.load(f)
+          assert len(logs) == 12, f'Expected 12 events, got {len(logs)}'
+          blocked = sum(1 for l in logs if l['outcome'] == 'blocked')
+          assert blocked >= 9, f'Expected 9+ blocked actions, got {blocked}'
+          print(f'Events: {len(logs)}, Blocked: {blocked} — OK')
+          "
